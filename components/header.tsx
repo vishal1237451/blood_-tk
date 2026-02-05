@@ -10,6 +10,8 @@ const navLinks = [
   { href: "/", label: "Dashboard" },
   { href: "/donate", label: "Donate Blood" },
   { href: "/request-test", label: "Request Blood Test" },
+  { href: "/admin/donors", label: "Admin - Donors" },
+  { href: "/admin/tests", label: "Admin - Tests" },
 ];
 
 export function Header() {
