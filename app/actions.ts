@@ -78,19 +78,29 @@ export async function getBloodInventory() {
   try {
     const supabase = await createServerSupabaseClient();
 
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return [];
+    }
+
     const { data, error } = await supabase
       .from("blood_inventory")
       .select("*")
       .order("blood_type");
 
     if (error) {
-      console.error("Error fetching blood inventory:", error.message);
+      console.error("Error fetching blood inventory:", error);
       return [];
     }
 
-    return data || [];
+    if (!data) {
+      console.warn("No data returned from blood_inventory query");
+      return [];
+    }
+
+    return data;
   } catch (error) {
-    console.error("Error in getBloodInventory:", error);
+    console.error("Exception in getBloodInventory:", error instanceof Error ? error.message : String(error));
     return [];
   }
 }
@@ -99,11 +109,31 @@ export async function getDashboardStats() {
   try {
     const supabase = await createServerSupabaseClient();
 
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return {
+        totalUnits: 0,
+        totalDonors: 0,
+        pendingTests: 0,
+        criticalTypes: 0,
+      };
+    }
+
     const [inventoryResult, donorsResult, testsResult] = await Promise.all([
       supabase.from("blood_inventory").select("units_available"),
       supabase.from("donor_applications").select("id", { count: "exact" }).eq("status", "pending"),
       supabase.from("blood_test_requests").select("id", { count: "exact" }).eq("status", "pending"),
     ]);
+
+    if (inventoryResult.error) {
+      console.error("Error fetching inventory:", inventoryResult.error);
+    }
+    if (donorsResult.error) {
+      console.error("Error fetching donors:", donorsResult.error);
+    }
+    if (testsResult.error) {
+      console.error("Error fetching tests:", testsResult.error);
+    }
 
     const totalUnits = inventoryResult.data?.reduce(
       (sum, item) => sum + (item.units_available || 0),
@@ -121,7 +151,7 @@ export async function getDashboardStats() {
       criticalTypes,
     };
   } catch (error) {
-    console.error("Error in getDashboardStats:", error);
+    console.error("Exception in getDashboardStats:", error instanceof Error ? error.message : String(error));
     return {
       totalUnits: 0,
       totalDonors: 0,
