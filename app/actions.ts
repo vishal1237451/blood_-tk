@@ -75,43 +75,172 @@ export async function submitBloodTestRequest(formData: FormData) {
 }
 
 export async function getBloodInventory() {
-  const supabase = await createServerSupabaseClient();
+  try {
+    const supabase = await createServerSupabaseClient();
 
-  const { data, error } = await supabase
-    .from("blood_inventory")
-    .select("*")
-    .order("blood_type");
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return [];
+    }
 
-  if (error) {
-    console.error("Error fetching blood inventory:", error);
+    const { data, error } = await supabase
+      .from("blood_inventory")
+      .select("*")
+      .order("blood_type");
+
+    if (error) {
+      console.error("Error fetching blood inventory:", error);
+      return [];
+    }
+
+    if (!data) {
+      console.warn("No data returned from blood_inventory query");
+      return [];
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Exception in getBloodInventory:", error instanceof Error ? error.message : String(error));
     return [];
   }
-
-  return data;
 }
 
 export async function getDashboardStats() {
-  const supabase = await createServerSupabaseClient();
+  try {
+    const supabase = await createServerSupabaseClient();
 
-  const [inventoryResult, donorsResult, testsResult] = await Promise.all([
-    supabase.from("blood_inventory").select("units_available"),
-    supabase.from("donor_applications").select("id").eq("status", "pending"),
-    supabase.from("blood_test_requests").select("id").eq("status", "pending"),
-  ]);
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return {
+        totalUnits: 0,
+        totalDonors: 0,
+        pendingTests: 0,
+        criticalTypes: 0,
+      };
+    }
 
-  const totalUnits = inventoryResult.data?.reduce(
-    (sum, item) => sum + item.units_available,
-    0
-  ) || 0;
+    const [inventoryResult, donorsResult, testsResult] = await Promise.all([
+      supabase.from("blood_inventory").select("units_available"),
+      supabase.from("donor_applications").select("id", { count: "exact" }).eq("status", "pending"),
+      supabase.from("blood_test_requests").select("id", { count: "exact" }).eq("status", "pending"),
+    ]);
 
-  const criticalTypes = inventoryResult.data?.filter(
-    (item) => item.units_available <= 5
-  ).length || 0;
+    if (inventoryResult.error) {
+      console.error("Error fetching inventory:", inventoryResult.error);
+    }
+    if (donorsResult.error) {
+      console.error("Error fetching donors:", donorsResult.error);
+    }
+    if (testsResult.error) {
+      console.error("Error fetching tests:", testsResult.error);
+    }
 
-  return {
-    totalUnits,
-    totalDonors: donorsResult.data?.length || 0,
-    pendingTests: testsResult.data?.length || 0,
-    criticalTypes,
-  };
+    const totalUnits = inventoryResult.data?.reduce(
+      (sum, item) => sum + (item.units_available || 0),
+      0
+    ) || 0;
+
+    const criticalTypes = inventoryResult.data?.filter(
+      (item) => (item.units_available || 0) <= 5
+    ).length || 0;
+
+    return {
+      totalUnits,
+      totalDonors: donorsResult.count || 0,
+      pendingTests: testsResult.count || 0,
+      criticalTypes,
+    };
+  } catch (error) {
+    console.error("Exception in getDashboardStats:", error instanceof Error ? error.message : String(error));
+    return {
+      totalUnits: 0,
+      totalDonors: 0,
+      pendingTests: 0,
+      criticalTypes: 0,
+    };
+  }
+}
+
+export async function getDonorApplications() {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("donor_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching donor applications:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exception in getDonorApplications:", error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
+export async function getBloodTestRequests() {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("blood_test_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching blood test requests:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exception in getBloodTestRequests:", error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
+export async function updateDonorApplicationStatus(id: string, status: string) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase
+      .from("donor_applications")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating donor application:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in updateDonorApplicationStatus:", error instanceof Error ? error.message : String(error));
+    return { success: false, error: "Failed to update" };
+  }
+}
+
+export async function updateBloodTestRequestStatus(id: string, status: string) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase
+      .from("blood_test_requests")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating blood test request:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in updateBloodTestRequestStatus:", error instanceof Error ? error.message : String(error));
+    return { success: false, error: "Failed to update" };
+  }
 }
