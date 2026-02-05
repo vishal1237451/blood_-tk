@@ -160,3 +160,87 @@ export async function getDashboardStats() {
     };
   }
 }
+
+export async function getDonorApplications() {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("donor_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching donor applications:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exception in getDonorApplications:", error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
+export async function getBloodTestRequests() {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("blood_test_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching blood test requests:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exception in getBloodTestRequests:", error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
+export async function updateDonorApplicationStatus(id: string, status: string) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase
+      .from("donor_applications")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating donor application:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in updateDonorApplicationStatus:", error instanceof Error ? error.message : String(error));
+    return { success: false, error: "Failed to update" };
+  }
+}
+
+export async function updateBloodTestRequestStatus(id: string, status: string) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const { error } = await supabase
+      .from("blood_test_requests")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating blood test request:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in updateBloodTestRequestStatus:", error instanceof Error ? error.message : String(error));
+    return { success: false, error: "Failed to update" };
+  }
+}
