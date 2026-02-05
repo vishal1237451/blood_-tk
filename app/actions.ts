@@ -75,43 +75,58 @@ export async function submitBloodTestRequest(formData: FormData) {
 }
 
 export async function getBloodInventory() {
-  const supabase = await createServerSupabaseClient();
+  try {
+    const supabase = await createServerSupabaseClient();
 
-  const { data, error } = await supabase
-    .from("blood_inventory")
-    .select("*")
-    .order("blood_type");
+    const { data, error } = await supabase
+      .from("blood_inventory")
+      .select("*")
+      .order("blood_type");
 
-  if (error) {
-    console.error("Error fetching blood inventory:", error);
+    if (error) {
+      console.error("Error fetching blood inventory:", error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getBloodInventory:", error);
     return [];
   }
-
-  return data;
 }
 
 export async function getDashboardStats() {
-  const supabase = await createServerSupabaseClient();
+  try {
+    const supabase = await createServerSupabaseClient();
 
-  const [inventoryResult, donorsResult, testsResult] = await Promise.all([
-    supabase.from("blood_inventory").select("units_available"),
-    supabase.from("donor_applications").select("id").eq("status", "pending"),
-    supabase.from("blood_test_requests").select("id").eq("status", "pending"),
-  ]);
+    const [inventoryResult, donorsResult, testsResult] = await Promise.all([
+      supabase.from("blood_inventory").select("units_available"),
+      supabase.from("donor_applications").select("id", { count: "exact" }).eq("status", "pending"),
+      supabase.from("blood_test_requests").select("id", { count: "exact" }).eq("status", "pending"),
+    ]);
 
-  const totalUnits = inventoryResult.data?.reduce(
-    (sum, item) => sum + item.units_available,
-    0
-  ) || 0;
+    const totalUnits = inventoryResult.data?.reduce(
+      (sum, item) => sum + (item.units_available || 0),
+      0
+    ) || 0;
 
-  const criticalTypes = inventoryResult.data?.filter(
-    (item) => item.units_available <= 5
-  ).length || 0;
+    const criticalTypes = inventoryResult.data?.filter(
+      (item) => (item.units_available || 0) <= 5
+    ).length || 0;
 
-  return {
-    totalUnits,
-    totalDonors: donorsResult.data?.length || 0,
-    pendingTests: testsResult.data?.length || 0,
-    criticalTypes,
-  };
+    return {
+      totalUnits,
+      totalDonors: donorsResult.count || 0,
+      pendingTests: testsResult.count || 0,
+      criticalTypes,
+    };
+  } catch (error) {
+    console.error("Error in getDashboardStats:", error);
+    return {
+      totalUnits: 0,
+      totalDonors: 0,
+      pendingTests: 0,
+      criticalTypes: 0,
+    };
+  }
 }
