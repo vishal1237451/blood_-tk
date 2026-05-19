@@ -1,7 +1,7 @@
 import { Header } from "@/components/header";
 import { BloodInventoryCard } from "@/components/blood-inventory-card";
 import { DashboardStats } from "@/components/dashboard-stats";
-import { getBloodInventory, getDashboardStats } from "@/app/actions";
+import { getBloodInventory, getDashboardStats } from "@/backend/actions";
 import { Droplet, Heart, Users } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -25,8 +25,6 @@ export default async function DashboardPage() {
 
         <DashboardStats
           totalUnits={stats.totalUnits}
-          totalDonors={stats.totalDonors}
-          pendingTests={stats.pendingTests}
           criticalTypes={stats.criticalTypes}
         />
 

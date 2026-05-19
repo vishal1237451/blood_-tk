@@ -1,17 +1,13 @@
-import { Users, TestTube, Droplets, AlertTriangle } from "lucide-react";
+import { Droplets, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface DashboardStatsProps {
   totalUnits: number;
-  totalDonors: number;
-  pendingTests: number;
   criticalTypes: number;
 }
 
 export function DashboardStats({
   totalUnits,
-  totalDonors,
-  pendingTests,
   criticalTypes,
 }: DashboardStatsProps) {
   const stats = [
@@ -21,20 +17,6 @@ export function DashboardStats({
       icon: Droplets,
       color: "text-primary",
       bgColor: "bg-primary/10",
-    },
-    {
-      label: "Donor Applications",
-      value: totalDonors,
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      label: "Pending Tests",
-      value: pendingTests,
-      icon: TestTube,
-      color: "text-violet-600",
-      bgColor: "bg-violet-100",
     },
     {
       label: "Critical Stock",

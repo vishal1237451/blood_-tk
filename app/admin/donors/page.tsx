@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getDonorApplications } from '@/app/actions'
+import { getDonorApplications } from '@/backend/actions'
 import { DonorsTable } from '@/components/donors-table'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { DonorApplication } from '@/lib/supabase'
+import type { DonorApplication } from '@/backend/supabase'
 
 export default function DonorsPage() {
   const [donors, setDonors] = useState<DonorApplication[]>([])

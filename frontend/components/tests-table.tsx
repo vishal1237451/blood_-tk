@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateBloodTestRequestStatus } from '@/app/actions'
+import { updateBloodTestRequestStatus } from '@/backend/actions'
 import {
   Table,
   TableBody,
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { BloodTestRequest } from '@/lib/supabase'
+import type { BloodTestRequest } from '@/backend/supabase'
 
 interface TestsTableProps {
   tests: BloodTestRequest[]

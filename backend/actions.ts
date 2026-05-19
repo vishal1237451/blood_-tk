@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerSupabaseClient } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/backend/supabase";
 
 export async function submitDonorApplication(formData: FormData) {
   const supabase = await createServerSupabaseClient();
@@ -113,26 +113,14 @@ export async function getDashboardStats() {
       console.error("Supabase client not initialized");
       return {
         totalUnits: 0,
-        totalDonors: 0,
-        pendingTests: 0,
         criticalTypes: 0,
       };
     }
 
-    const [inventoryResult, donorsResult, testsResult] = await Promise.all([
-      supabase.from("blood_inventory").select("units_available"),
-      supabase.from("donor_applications").select("id", { count: "exact" }).eq("status", "pending"),
-      supabase.from("blood_test_requests").select("id", { count: "exact" }).eq("status", "pending"),
-    ]);
+    const inventoryResult = await supabase.from("blood_inventory").select("units_available");
 
     if (inventoryResult.error) {
       console.error("Error fetching inventory:", inventoryResult.error);
-    }
-    if (donorsResult.error) {
-      console.error("Error fetching donors:", donorsResult.error);
-    }
-    if (testsResult.error) {
-      console.error("Error fetching tests:", testsResult.error);
     }
 
     const totalUnits = inventoryResult.data?.reduce(
@@ -146,16 +134,12 @@ export async function getDashboardStats() {
 
     return {
       totalUnits,
-      totalDonors: donorsResult.count || 0,
-      pendingTests: testsResult.count || 0,
       criticalTypes,
     };
   } catch (error) {
     console.error("Exception in getDashboardStats:", error instanceof Error ? error.message : String(error));
     return {
       totalUnits: 0,
-      totalDonors: 0,
-      pendingTests: 0,
       criticalTypes: 0,
     };
   }
@@ -242,5 +226,53 @@ export async function updateBloodTestRequestStatus(id: string, status: string) {
   } catch (error) {
     console.error("Exception in updateBloodTestRequestStatus:", error instanceof Error ? error.message : String(error));
     return { success: false, error: "Failed to update" };
+  }
+}
+
+export async function signInAdmin(formData: FormData) {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    
+    if (!email || !password) {
+      return { success: false, error: "Please provide both email and password" };
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in signInAdmin:", error instanceof Error ? error.message : String(error));
+    return { success: false, error: "Authentication failed" };
+  }
+}
+
+export async function signOutAdmin() {
+  try {
+    const supabase = await createServerSupabaseClient();
+    await supabase.auth.signOut();
+    return { success: true };
+  } catch (error) {
+    console.error("Exception in signOutAdmin:", error);
+    return { success: false };
+  }
+}
+
+export async function getUser() {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    return null;
   }
 }

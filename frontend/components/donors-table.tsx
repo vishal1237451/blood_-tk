@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateDonorApplicationStatus } from '@/app/actions'
+import { updateDonorApplicationStatus } from '@/backend/actions'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { DonorApplication } from '@/lib/supabase'
+import type { DonorApplication } from '@/backend/supabase'
 
 interface DonorsTableProps {
   donors: DonorApplication[]

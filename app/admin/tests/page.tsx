@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getBloodTestRequests } from '@/app/actions'
+import { getBloodTestRequests } from '@/backend/actions'
 import { TestsTable } from '@/components/tests-table'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { BloodTestRequest } from '@/lib/supabase'
+import type { BloodTestRequest } from '@/backend/supabase'
 
 export default function TestsPage() {
   const [tests, setTests] = useState<BloodTestRequest[]>([])

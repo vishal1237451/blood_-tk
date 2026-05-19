@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { submitDonorApplication } from "@/app/actions";
+import { submitDonorApplication } from "@/backend/actions";
 import { CheckCircle, Loader2 } from "lucide-react";
 
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
