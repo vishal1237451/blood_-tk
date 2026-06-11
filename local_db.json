@@ -1,0 +1,62 @@
+{
+  "blood_inventory": [
+    {
+      "id": "1",
+      "blood_type": "A+",
+      "units_available": 10,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "2",
+      "blood_type": "A-",
+      "units_available": 5,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "3",
+      "blood_type": "B+",
+      "units_available": 12,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "4",
+      "blood_type": "B-",
+      "units_available": 3,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "5",
+      "blood_type": "AB+",
+      "units_available": 4,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "6",
+      "blood_type": "AB-",
+      "units_available": 2,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "7",
+      "blood_type": "O+",
+      "units_available": 15,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    },
+    {
+      "id": "8",
+      "blood_type": "O-",
+      "units_available": 8,
+      "last_updated": "2026-06-11T03:22:40.990Z",
+      "created_at": "2026-06-11T03:22:40.990Z"
+    }
+  ],
+  "donor_applications": [],
+  "blood_test_requests": []
+}

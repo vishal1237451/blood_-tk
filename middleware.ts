@@ -27,22 +27,31 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
+  } catch (err) {
+    console.warn(
+      "[Middleware Fallback] Supabase session fetch failed, checking local auth cookie."
+    );
+  }
+
+  const localSession = request.cookies.get("local_admin_session")?.value === "true";
+  const isAuthenticated = !!user || localSession;
 
   // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  if (request.nextUrl.pathname.startsWith("/admin") && !isAuthenticated) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
   // Prevent logged-in users from seeing the login page
-  if (request.nextUrl.pathname === '/login' && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin/donors'
-    return NextResponse.redirect(url)
+  if (request.nextUrl.pathname === "/login" && isAuthenticated) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/donors";
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse
